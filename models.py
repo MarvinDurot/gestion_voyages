@@ -23,7 +23,7 @@ class City(Base):
     name = Column(String, nullable=False)
     isCapital = Column(Boolean, nullable=False, default=False)
     country = Column(String, nullable=False)
-    capitalId = Column(ForeignKey('City.id'), nullable=True)
+    capitalId = Column(Integer, ForeignKey('cities.id'), nullable=True)
 
     def __init__(self, id, name, isCapital, country, capitalId):
         self.id = id
@@ -38,7 +38,7 @@ class Travel(Base):
     date = Column(DateTime, nullable=False)
     duration = Column(Integer, nullable=False)
     review = Column(String, nullable=True)
-    cityId = Column(Integer, ForeignKey('City.id'), nullable=False)
+    cityId = Column(Integer, ForeignKey('cities.id'), nullable=False)
     transports = relationship('Transport', backref=backref('transports', uselist=True, cascade='delete,all'))
     accomodations = relationship('Accomodation', backref=backref('accomodations', uselist=True, cascade='delete,all'))
 
@@ -57,7 +57,7 @@ class Transport(Base):
     type = Column(Enum('Voiture', 'Train', 'Avion', 'Bateau'), nullable=False)
     price = Column(Numeric(2, 4), nullable=False)
     duration = Column(Integer, nullable=False)
-    travelId = Column(ForeignKey('Travel.id'), nullable=False)
+    travelId = Column(Integer, ForeignKey('travels.id'), nullable=False)
 
     def __init__(self, id, type, price, duration, travelId):
         self.id = id
@@ -72,7 +72,7 @@ class Accomodation(Base):
     name = Column(String, nullable=False)
     type = Column(Enum('Hôtel', 'Gîte', 'Location', 'Camping'), nullable=False)
     price = Column(Numeric(2, 4), nullable=False)
-    travelId = Column(ForeignKey('Travel.id'), nullable=False)
+    travelId = Column(Integer, ForeignKey('travels.id'), nullable=False)
 
     def __init__(self, id, name, type, price, travelId):
         self.id = id
