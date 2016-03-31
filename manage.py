@@ -1,0 +1,1 @@
+# Manage application in console mode
