@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Numeric, Boolean
 from sqlalchemy.orm import relationship, backref, sessionmaker
+import datetime
 
 Base = declarative_base()
 engine = create_engine('sqlite:///database.sqlite3', echo=False)
@@ -64,7 +65,7 @@ class Travel(Base):
     accomodations = relationship('Accomodation', backref=backref('accomodations', uselist=True, cascade='delete,all'))
 
     def __init__(self, date, duration, review, cityId, transports, accomodations):
-        self.date = date
+        self.date = datetime.datetime.strptime(date, "%d/%m/%Y")
         self.duration = duration
         self.review = review
         self.cityId = cityId
@@ -86,11 +87,10 @@ class Transport(Base):
     duration = Column(Integer, nullable=False)
     travelId = Column(Integer, ForeignKey('travels.id'), nullable=False)
 
-    def __init__(self, type, price, duration, travelId):
+    def __init__(self, type, price, duration):
         self.type = type
         self.price = price
         self.duration = duration
-        self.travelId = travelId
 
     def __repr__(self):
         return "Transport (type=%s, price=%d, duration=%d)" % (self.type, self.price, self.duration)
@@ -107,11 +107,10 @@ class Accomodation(Base):
     price = Column(Numeric(2, 4), nullable=False)
     travelId = Column(Integer, ForeignKey('travels.id'), nullable=False)
 
-    def __init__(self, name, type, price, travelId):
+    def __init__(self, name, type, price):
         self.name = name
         self.type = type
         self.price = price
-        self.travelId = travelId
 
     def __repr__(self):
         return "Accomodation (name=%s, type=%s, price=%d)" % (self.name, self.type, self.price)
