@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+    <title>Starter Template - Materialize</title>
+
+    <!-- CSS  -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+    <link href="../assets/css/styles.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+    <nav class="light-blue lighten-1" role="navigation">
+        <div class="nav-wrapper container">
+            <!-- Logo -->
+            <a id="logo-container" href="accueil.html" class="brand-logo"><i class="material-icons left">language</i>TravelCity</a>
+            <!-- Boutons à droite -->
+            <ul class="right hide-on-med-and-down">
+                <li><a href="admin.html"><i class="material-icons left">vpn_key</i>Administration</a></li>
+            </ul>
+            <!-- Navigation mobile -->
+            <ul id="nav-mobile" class="side-nav">
+                <li><a href="admin.html"><i class="material-icons left">vpn_key</i>Administration</a></li>
+            </ul>
+            <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+        </div>
+    </nav>
+    <br/>
+</header>
+
+<!-- Contenu de la page -->
+<main>
+    <div class="section no-pad-bot" id="index-banner">
+        <div class="container">
+            <div class="row">
+                <div class="col s12 m6">
+                    <!-- Tableau des voyages -->
+                    <table id="travels-table" class="centered striped responsive">
+                        <thead>
+                        <tr>
+                            <th data-field="city">Ville</th>
+                            <th data-field="start">Date de départ</th>
+                            <th data-field="end">Date de retour</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr data-id="1">
+                            <td>Paris</td>
+                            <td>12/12/2014</td>
+                            <td>14/12/2014</td>
+                        </tr>
+                        <tr data-id="2">
+                            <td>Lisbonne</td>
+                            <td>20/05/2015</td>
+                            <td>24/05/2015</td>
+                        </tr>
+                        <tr data-id="3">
+                            <td>Madrid</td>
+                            <td>02/08/2016</td>
+                            <td>06/08/2016</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <form class="col s12 m6">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <select id="city" required>
+                                <option value="" disabled selected>Choisissez une ville...</option>
+                                <option value="1">Paris</option>
+                                <option value="2">Rome</option>
+                                <option value="3">Berlin</option>
+                            </select>
+                            <label for="city">Ville</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <input id="start" type="date" class="datepicker" required>
+                            <label for="start">Date de départ</label>
+                        </div>
+                        <div class="input-field col s6">
+                            <input id="end" type="date" class="datepicker" required>
+                            <label for="end">Date de retour</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <textarea id="review" placeholder="Saisissez un avis..." class="materialize-textarea"
+                                      required></textarea>
+                            <label for="review">Avis</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Modale contenant le formulaire des transports -->
+                        <div id="modal-transports" class="modal bottom-sheet">
+                            <div class="modal-content">
+                                <h4>Transports</h4>
+                                <div class="row">
+                                    <div class="input-field col s4">
+                                        <select id="transport1_type" required>
+                                            <option value="" disabled selected>Type de transport...</option>
+                                            <option value="1">Paris</option>
+                                            <option value="2">Rome</option>
+                                            <option value="3">Berlin</option>
+                                        </select>
+                                        <label for="transport1_type">Type</label>
+                                    </div>
+                                    <div class="input-field col s4">
+                                        <input id="transport1_duration" type="number" class="validate">
+                                        <label for="transport1_duration">Durée</label>
+                                    </div>
+                                    <div class="input-field col s4">
+                                        <input id="transport1_price" type="number" class="validate">
+                                        <label for="transport1_price">Prix</label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="input-field col s4">
+                                        <select id="transport2_type" required>
+                                            <option value="" disabled selected>Type de transport...</option>
+                                            <option value="1">Paris</option>
+                                            <option value="2">Rome</option>
+                                            <option value="3">Berlin</option>
+                                        </select>
+                                        <label for="transport2_type">Type</label>
+                                    </div>
+                                    <div class="input-field col s4">
+                                        <input id="transport2_duration" type="number" class="validate">
+                                        <label for="transport2_duration">Durée</label>
+                                    </div>
+                                    <div class="input-field col s4">
+                                        <input id="transport2_price" type="number" class="validate">
+                                        <label for="transport2_price">Prix</label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="input-field col s4">
+                                        <select id="transport3_type" required>
+                                            <option value="" disabled selected>Type de transport...</option>
+                                            <option value="1">Paris</option>
+                                            <option value="2">Rome</option>
+                                            <option value="3">Berlin</option>
+                                        </select>
+                                        <label for="transport3_type">Type</label>
+                                    </div>
+                                    <div class="input-field col s4">
+                                        <input id="transport3_duration" type="number" class="validate">
+                                        <label for="transport3_duration">Durée</label>
+                                    </div>
+                                    <div class="input-field col s4">
+                                        <input id="transport3_price" type="number" class="validate">
+                                        <label for="transport3_price">Prix</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer"></div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Modale contenant le formulaire des hébergements -->
+                        <div id="modal-accomodations" class="modal bottom-sheet">
+                            <div class="modal-content">
+                                <h4>Hébergements</h4>
+                                <div class="row">
+                                    <div class="input-field col s4">
+                                        <select id="accomodation1_type" required>
+                                            <option value="" disabled selected>Type d'hébergement...</option>
+                                            <option value="1">Paris</option>
+                                            <option value="2">Rome</option>
+                                            <option value="3">Berlin</option>
+                                        </select>
+                                        <label for="accomodation1_type">Type</label>
+                                    </div>
+                                    <div class="input-field col s4">
+                                        <input id="accomodation1_name" type="text" class="validate">
+                                        <label for="accomodation1_name">Nom</label>
+                                    </div>
+                                    <div class="input-field col s4">
+                                        <input id="accomodation1_price" type="number" class="validate">
+                                        <label for="accomodation1_price">Prix</label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="input-field col s4">
+                                        <select id="accomodation2_type" required>
+                                            <option value="" disabled selected>Type d'hébergement...</option>
+                                            <option value="1">Paris</option>
+                                            <option value="2">Rome</option>
+                                            <option value="3">Berlin</option>
+                                        </select>
+                                        <label for="accomodation2_type">Type</label>
+                                    </div>
+                                    <div class="input-field col s4">
+                                        <input id="accomodation2_name" type="text" class="validate">
+                                        <label for="accomodation2_name">Nom</label>
+                                    </div>
+                                    <div class="input-field col s4">
+                                        <input id="accomodation2_price" type="number" class="validate">
+                                        <label for="accomodation2_price">Prix</label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="input-field col s4">
+                                        <select id="accomodation3_type" required>
+                                            <option value="" disabled selected>Type d'hébergement...</option>
+                                            <option value="1">Paris</option>
+                                            <option value="2">Rome</option>
+                                            <option value="3">Berlin</option>
+                                        </select>
+                                        <label for="accomodation3_type">Type</label>
+                                    </div>
+                                    <div class="input-field col s4">
+                                        <input id="accomodation3_name" type="text" class="validate">
+                                        <label for="accomodation3_name">Nom</label>
+                                    </div>
+                                    <div class="input-field col s4">
+                                        <input id="accomodation3_price" type="number" class="validate">
+                                        <label for="accomodation3_price">Prix</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer"></div>
+                        </div>
+                    </div>
+                    <!-- Boutons du formulaire -->
+                    <div class="row">
+                        <div class="col s12 m6">
+                            <a class="waves-effect waves-light btn modal-trigger orange" href="#modal-accomodations">
+                                <i class="material-icons left">library_add</i>
+                                Hébergements
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s12 m6">
+                            <a class="waves-effect waves-light btn modal-trigger orange" href="#modal-transports">
+                                <i class="material-icons left">library_add</i>
+                                Transports
+                            </a>
+                        </div>
+                    </div>
+                    <br/><br/>
+                    <div class="row">
+                        <div class="col s12">
+                            <!-- Submit button -->
+                            <button class="btn waves-effect waves-light blue right" type="submit" name="save">
+                                Enregistrer
+                                <i class="material-icons right">mode_edit</i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="page-footer orange">
+    <div class="footer-copyright">
+        <div class="container">
+            Réalisé par Marvin DUROT
+            <a class="grey-text text-lighten-4 right" href="#!">GitHub</a>
+        </div>
+    </div>
+</footer>
+
+<!--  Scripts-->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+<script src="../assets/js/scripts.js"></script>
+
+</body>
+</html>
