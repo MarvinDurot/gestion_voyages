@@ -13,23 +13,6 @@ engine = create_engine('sqlite:///database.sqlite3', echo=False)
 Session = sessionmaker(bind=engine)
 
 
-class User(Base):
-    """
-    Représentation en base d'un utilisateur.
-    """
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    login = Column(String, nullable=False)
-    password = Column(String, nullable=False)
-
-    def __init__(self, login, password):
-        self.login = login
-        self.password = password
-
-    def __repr__(self):
-        return "User (login=%s, password=%s)" % (self.login, self.password)
-
-
 class City(Base):
     """
     Représentation en base d'une ville.
@@ -41,14 +24,14 @@ class City(Base):
     country = Column(String, nullable=False)
     capitalId = Column(Integer, ForeignKey('cities.id'), nullable=True)
 
-    def __init__(self, name, isCapital, country, capitalId):
-        self.name = name
-        self.isCapital = isCapital
-        self.country = country
-        self.capitalId = capitalId
-
     def __repr__(self):
         return "City (name=%s, isCapital=%r, country=%s)" % (self.name, self.isCapital, self.country)
+
+    def input(self):
+        self.name = str(input("Nom?"))
+        self.isCapital = bool(input("Est une capitale? (0,1) "))
+        self.country = str(input("Pays? "))
+        self.capitalId = int(input("Capitale la plus proche? "))
 
 
 class Travel(Base):
@@ -57,23 +40,22 @@ class Travel(Base):
     """
     __tablename__ = 'travels'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    date = Column(DateTime, nullable=False)
-    duration = Column(Integer, nullable=False)
+    start = Column(DateTime, nullable=False)
+    end = Column(DateTime, nullable=False)
     review = Column(String, nullable=True)
     cityId = Column(Integer, ForeignKey('cities.id'), nullable=False)
     transports = relationship('Transport', backref=backref('transports', uselist=True, cascade='delete,all'))
     accomodations = relationship('Accomodation', backref=backref('accomodations', uselist=True, cascade='delete,all'))
 
-    def __init__(self, date, duration, review, cityId, transports, accomodations):
-        self.date = datetime.datetime.strptime(date, "%d/%m/%Y")
-        self.duration = duration
-        self.review = review
-        self.cityId = cityId
-        self.transports = transports
-        self.accomodations = accomodations
+    def input(self):
+        self.start = datetime.datetime.strptime(input("Date de départ? "), "%d/%m/%Y")
+        self.end = datetime.datetime.strptime(input("Date de retour? "), "%d/%m/%Y")
+        self.review = str(input("Avis sur la ville ? "))
+        self.cityId = int(input("Ville? "))
 
     def __repr__(self):
-        return "Travel (date=%s, duration=%d, review=%s)" % (self.date.strftime("%d-%m-%Y"), self.duration, self.review)
+        return "Travel (start=%s, end=%s, review=%s)" % (
+            self.start.strftime("%d-%m-%Y"), self.end.strftime("%d-%m-%Y"), self.review)
 
 
 class Transport(Base):
@@ -87,10 +69,10 @@ class Transport(Base):
     duration = Column(Integer, nullable=False)
     travelId = Column(Integer, ForeignKey('travels.id'), nullable=False)
 
-    def __init__(self, type, price, duration):
-        self.type = type
-        self.price = price
-        self.duration = duration
+    def input(self):
+        self.type = str(input("Type? "))
+        self.price = float(input("Prix? "))
+        self.duration = int(input("Durée? "))
 
     def __repr__(self):
         return "Transport (type=%s, price=%d, duration=%d)" % (self.type, self.price, self.duration)
@@ -107,10 +89,10 @@ class Accomodation(Base):
     price = Column(Numeric(2, 4), nullable=False)
     travelId = Column(Integer, ForeignKey('travels.id'), nullable=False)
 
-    def __init__(self, name, type, price):
-        self.name = name
-        self.type = type
-        self.price = price
+    def input(self):
+        self.name = str(input("Nom? "))
+        self.type = str(input("Type? "))
+        self.price = float(input("Prix? "))
 
     def __repr__(self):
         return "Accomodation (name=%s, type=%s, price=%d)" % (self.name, self.type, self.price)
