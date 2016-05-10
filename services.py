@@ -2,7 +2,7 @@
 Services de l'application
 """
 
-from models import User, Travel, Transport, Accomodation, City, Session
+from models import Travel, Transport, Accomodation, City, Session
 
 
 class GenericService:
@@ -66,6 +66,30 @@ class TravelService(GenericService):
     Service pour le modèle Travel.
     """
     __modelClass__ = Travel
+
+    def all_capitals(self):
+        """
+        Récupère tous les voyages qui concernent une capitale
+        :return: list
+        """
+        return self.__session__.query(Travel, City) \
+            .join(City).filter(City.isCapital == 1) \
+            .order_by(City.name).all()
+
+    def all_by_budget(self):
+        """
+        Récupère tous les voyages triés par budget minimum
+        (prix de l'hébergement + prix du transport)
+        :return: list
+        """
+        return self.__session__.query(Travel).order_by(Travel.budget).all()
+
+    def all_by_transport_duration(self):
+        """
+        Récupère tous les voyages triés par durée de transport minimum
+        :return: list
+        """
+        return self.__session__.query(Travel).order_by(Travel.transport_duration).all()
 
 
 class TransportService(GenericService):
