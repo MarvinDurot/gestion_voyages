@@ -4,6 +4,7 @@ Modèles de l'application
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Numeric, Boolean
 from sqlalchemy.orm import relationship, backref, sessionmaker
 import datetime
@@ -46,6 +47,17 @@ class Travel(Base):
     cityId = Column(Integer, ForeignKey('cities.id'), nullable=False)
     transports = relationship('Transport', backref=backref('transports', uselist=True, cascade='delete,all'))
     accomodations = relationship('Accomodation', backref=backref('accomodations', uselist=True, cascade='delete,all'))
+
+    @hybrid_property
+    def budget(self):
+        transport_prices = [transport['price'] for transport in self.transports]
+        accomodations_prices = [accomodation['price'] for accomodation in self.accomodations]
+        return min(transport_prices) + min(accomodations_prices)
+
+    @hybrid_property
+    def transport_duration(self):
+        transport_durations = [transport['duration'] for transport in self.transports]
+        return min(transport_durations)
 
     def input(self):
         self.start = datetime.datetime.strptime(input("Date de départ? "), "%d/%m/%Y")
