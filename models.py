@@ -98,4 +98,6 @@ class Accomodation(Base):
         return "Accomodation (name=%s, type=%s, price=%d)" % (self.name, self.type, self.price)
 
 
-Base.metadata.create_all(engine)
+if __name__ == '__main__':
+    # Crée la base de données à partir du méta modèle
+    Base.metadata.create_all(engine)
