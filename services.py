@@ -67,6 +67,7 @@ class TravelService(GenericService):
     """
     __modelClass__ = Travel
 
+    @classmethod
     def all_capitals(self):
         """
         Récupère tous les voyages qui concernent une capitale
@@ -76,6 +77,7 @@ class TravelService(GenericService):
             .join(City).filter(City.isCapital == 1) \
             .order_by(City.name).all()
 
+    @classmethod
     def all_by_budget(self):
         """
         Récupère tous les voyages triés par budget minimum
@@ -84,6 +86,7 @@ class TravelService(GenericService):
         """
         return self.__session__.query(Travel).order_by(Travel.budget).all()
 
+    @classmethod
     def all_by_transport_duration(self):
         """
         Récupère tous les voyages triés par durée de transport minimum
