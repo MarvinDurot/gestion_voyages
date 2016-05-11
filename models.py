@@ -25,8 +25,15 @@ class City(Base):
     country = Column(String, nullable=False)
     capitalId = Column(Integer, ForeignKey('cities.id'), nullable=True)
 
+    @hybrid_property
+    def nearest_capital(self):
+        if self.isCapital:
+            return self.name
+        else:
+            return self.capital
+
     def __repr__(self):
-        return "City (name=%s, isCapital=%r, country=%s)" % (self.name, self.isCapital, self.country)
+        return "City (name=%s, nearest_capital=%s, country=%s)" % (self.name, self.isCapital, self.country)
 
     def input(self):
         self.name = str(input("Nom?"))
