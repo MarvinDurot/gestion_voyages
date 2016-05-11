@@ -1,0 +1,38 @@
+<%inherit file="base.mako.html" />
+<%block name="content">
+
+<div class="section no-pad-bot" id="index-banner">
+    <div class="container">
+        <div class="row">
+            <div class="col s12 m12">
+                <!-- Tableau des voyages -->
+                <table id="travels-table" class="centered striped responsive">
+                    <thead>
+                    <tr>
+                        <th data-field="city">Ville</th>
+                        <th data-field="start">Date de départ</th>
+                        <th data-field="end">Date de retour</th>
+                        <th data-field="nearest_capital">Capitale la plus proche</th>
+                        <th data-field="transport">Durée de transport</th>
+                        <th data-field="price">Budget (euros)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    % for travel in travels:
+                    <tr onClick="window.location.href = 'travel?travel_id=${travel.id}';">
+                        <td>${travel.city.name}</td>
+                        <td>${travel.start}</td>
+                        <td>${travel.end}</td>
+                        <td>${travel.nearest_capital}</td>
+                        <td>${travel.transport_duration}</td>
+                        <td>${travel.budget}</td>
+                    </tr>
+                    % endfor
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</%block>
