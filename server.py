@@ -107,5 +107,5 @@ class BackendController(Controller):
 
 if __name__ == '__main__':
     app = FrontendController()
-    conf = os.path.join(os.path.dirname(__file__), 'server.conf')
+    conf = os.path.join(os.path.dirname(__file__), '/config/server.conf')
     cherrypy.quickstart(app, '/', config=conf)
