@@ -2,13 +2,32 @@
 # Serveur de l'application
 #
 
+from mako.template import Template
+from mako.lookup import TemplateLookup
 from services import CityService, TravelService
 import cherrypy
-import os.path
+import os
 
-# Identifiants de l'administrateur
-USERNAME = 'admin'
-PASSWORD = 'admin'
+# Emplacement local et emplacements des templates
+_current_dir = os.path.abspath(os.path.dirname(__file__))
+_template_dir = os.path.join(_current_dir, 'templates')
+_module_dir = os.path.join(_template_dir, 'mako_modules')
+
+mylookup = TemplateLookup(
+    directories=[_template_dir],
+    module_directory=_module_dir,
+    input_encoding='utf-8',
+    output_encoding='utf-8',
+    encoding_errors='replace'
+)
+
+# Templates de l'application
+_home = mylookup.get_template('home.mako.html')
+_travel = mylookup.get_template('travel.mako.html')
+_travels = mylookup.get_template('travels.mako.html')
+_admin = mylookup.get_template('admin.mako.html')
+_admin_travels = mylookup.get_template('admin_travels.mako.html')
+# _admin_cities = mylookup.get_template('admin_cities.mako.html')
 
 
 class Controller:
@@ -17,19 +36,17 @@ class Controller:
     """
 
     def __init__(self):
-        self.vars = {
-            'message': None,
-            'title': 'Sans titre'
-        }
+        self.message = None
+        self.title = None
 
     def setMessage(self, message):
-        self.vars.message = message
+        self.message = message
 
     def setTitle(self, title):
-        self.vars.title = title
+        self.title = title
 
-    def getVars(self):
-        return self.vars
+    def render(self, view, **kwargs):
+        return view.render_unicode(title=self.title, message=self.message, **kwargs)
 
     @cherrypy.expose
     def default(self):
@@ -47,7 +64,8 @@ class FrontendController(Controller):
 
     @cherrypy.expose
     def index(self):
-        return '''<p>Page d'acceuil</p>'''
+        self.setTitle('Accueil')
+        return self.render(_home)
 
     @cherrypy.expose
     def travel(self, travel_id=None):
@@ -56,18 +74,28 @@ class FrontendController(Controller):
         except:
             raise cherrypy.NotFound
 
-        return '''<p>Affichage d'un voyage : %s</p>''' % travel
+        self.setTitle('Fiche voyage')
+        return self.render(_travel, travel=travel)
 
     @cherrypy.expose
     def travels(self, sorting=None):
-        if sorting == 'capital':
-            return '''<p>Affichage des voyages concernant une capitale</p>'''
-        elif sorting == 'price':
-            return '''<p>Affichage des voyages par budget</p>'''
-        elif sorting == 'duration':
-            return '''<p>Affichage des voyages par durée de transport</p>'''
+        if sorting == 'capitals':
+            travels = TravelService.all_capitals()
+            self.setTitle('Liste des voyages concernant une capitale')
+        elif sorting == 'budget':
+            travels = TravelService.all_by_budget()
+            self.setTitle('Liste des voyages triés par budget')
+        elif sorting == 'transport_duration':
+            travels = TravelService.all_by_transport_duration()
+            self.setTitle('Liste des voyages triés par durée de transport')
         else:
-            return '''<p>Affichage des voyages par défaut</p>'''
+            travels = TravelService.all()
+            self.setTitle('Liste des voyages')
+
+        if len(travels) == 0:
+            raise cherrypy.NotFound
+        else:
+            return self.render(_travels, travels=travels)
 
 
 class BackendController(Controller):
@@ -75,37 +103,130 @@ class BackendController(Controller):
     Contrôleur de la partie backend
     """
 
-    def __init__(self):
-        self._cp_config = {
-            'tools.auth_basic.on': True,
-            'tools.auth_basic.realm': 'localhost',
-            'tools.auth_basic.checkpassword': self.validate_password
-        }
-        super(self.__class__, self).__init__()
-
-    @staticmethod
-    def validate_password(real, username, password):
-        if username == USERNAME and password == PASSWORD:
-            return True
-        else:
-            return False
-
     @cherrypy.expose
     def index(self):
-        return '''<p>Page d'administration</p>'''
+        self.setTitle('Menu administration')
+        return self.render(_admin)
 
     @cherrypy.expose
     def travels(self):
         # TODO : traiter l'ajout et la suppression de voyages
-        return '''<p>Page de gestion des voyages</p>'''
+        self.setTitle('Administration des voyages')
+        return self.render(_admin_travels)
 
     @cherrypy.expose
-    def cities(self):
-        # TODO : traiter l'ajout et la suppression de villes
-        return '''<p>Page de gestion des villes</p>'''
+    def cities(self, city_id=None, name=None, is_capital=None, country=None, capital_id=None, delete=None, save=None):
+        # Récupération de la ville si son id est précisé
+        if city_id is None:
+            travel = None
+        else:
+            travel = TravelService.find(city_id)
+
+        # On a cliqué sur le bouton de suppression
+        if delete is not None:
+            self.delete_city(city_id)
+        # On a cliqué sur le bouton de sauvegarde
+        elif save is not None:
+            if city_id == 0:
+                self.create_city(name, is_capital, country, capital_id)
+            else:
+                self.update_city(city_id, name, is_capital, country, capital_id)
+
+        self.setTitle('Gérer les villes')
+        travels = TravelService.all()
+
+        return self.render(_admin_travels, travels=travels, travel=travel)
+
+    def update_city(self, id, name, is_capital, country, capital_id):
+        """
+        Met à jour une ville à partir d'informations récupérées dans un formulaire
+        :param id:
+        :param name:
+        :param is_capital:
+        :param country:
+        :param capital_id:
+        :return:
+        """
+        pass
+
+    def create_city(self, name, is_capital, country, capital_id):
+        """
+        Crée une nouvelle ville à partir d'informations récupérées dans un formulaire
+        :param name:
+        :param is_capital:
+        :param country:
+        :param capital_id:
+        :return:
+        """
+        pass
+
+    def delete_city(self, city_id):
+        """
+        Supprime une ville
+        :param city_id:
+        :return:
+        """
+        try:
+            TravelService.delete(city_id)
+            self.setMessage('Suppression réussie !')
+        except:
+            self.setMessage('Erreur lors de la suppression !')
+
+
+def validate_password(real, username, password):
+    """
+    Fonction de vérification du login / mot de passe
+    :param real:
+    :param username:
+    :param password:
+    :return: boolean
+    """
+    if username == 'admin' and password == 'admin123':
+        return True
+    else:
+        return False
 
 
 if __name__ == '__main__':
-    app = FrontendController()
-    conf = os.path.join(os.path.dirname(__file__), '/config/server.conf')
-    cherrypy.quickstart(app, '/', config=conf)
+    # Configuration générale de CherryPy
+    global_conf = {
+        'global': {
+            'autoreload.on': False,
+            'server.socket_host': '127.0.0.1',
+            'server.socket_port': 8080,
+            'server.protocol_version': 'HTTP/1.1',
+            'server.thread_pool': 5,
+            'tools.encode.encoding': 'utf-8',
+            'log.error_file': os.path.join(_current_dir, 'error.log'),
+            'log.screen': True
+        }
+    }
+
+    # Mise à jour de la configuration de CherryPy
+    cherrypy.config.update(global_conf)
+
+    # Configuration de l'application
+    app_conf = {
+        'backend': {
+            'tools.auth_basic.on': True,
+            'tools.auth_basic.realm': '127.0.0.1',
+            'tools.auth_basic.checkpassword': validate_password
+        },
+        '/assets': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': os.path.join(_current_dir, 'assets')
+        },
+        '/assets/css': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': os.path.join(_current_dir, 'assets/css'),
+            'tools.staticdir.content_types': {'css': 'text/css'}
+        },
+        '/assets/js': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': os.path.join(_current_dir, 'assets/js'),
+            'tools.staticdir.content_types': {'js': 'application/javascript'}
+        }
+    }
+
+    # Lancement du serveur
+    cherrypy.quickstart(FrontendController(), '/', config=app_conf)
