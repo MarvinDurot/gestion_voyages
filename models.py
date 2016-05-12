@@ -5,13 +5,13 @@ Modèles de l'application
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Numeric, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Boolean
 from sqlalchemy.orm import relationship, backref, sessionmaker
 import datetime
 
 Base = declarative_base()
 engine = create_engine('sqlite:///database.sqlite3', echo=False)
-Session = sessionmaker(bind=engine)
+Session = sessionmaker(bind=engine, autoflush=False)
 
 
 class City(Base):
@@ -21,25 +21,26 @@ class City(Base):
     __tablename__ = 'cities'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
-    isCapital = Column(Boolean, nullable=False, default=False)
+    is_capital = Column(Boolean, nullable=False, default=False)
     country = Column(String, nullable=False)
-    capitalId = Column(Integer, ForeignKey('cities.id'), nullable=True)
+    capital_id = Column(Integer, ForeignKey('cities.id'), nullable=True)
+    capital = relationship('City', lazy='joined')
 
     @hybrid_property
     def nearest_capital(self):
-        if self.isCapital:
+        if self.is_capital:
             return self.name
         else:
-            return self.capital
+            return self.capital.name
 
     def __repr__(self):
-        return "City (name=%s, nearest_capital=%s, country=%s)" % (self.name, self.isCapital, self.country)
+        return "City (name=%s, nearest_capital=%s, country=%s)" % (self.name, self.is_capital, self.country)
 
     def input(self):
         self.name = str(input("Nom?"))
-        self.isCapital = bool(input("Est une capitale? (0,1) "))
+        self.is_capital = bool(input("Est une capitale? (0,1) "))
         self.country = str(input("Pays? "))
-        self.capitalId = int(input("Capitale la plus proche? "))
+        self.capital_id = int(input("Capitale la plus proche? "))
 
 
 class Travel(Base):
@@ -51,26 +52,28 @@ class Travel(Base):
     start = Column(DateTime, nullable=False)
     end = Column(DateTime, nullable=False)
     review = Column(String, nullable=True)
-    cityId = Column(Integer, ForeignKey('cities.id'), nullable=False)
+    city_id = Column(Integer, ForeignKey('cities.id'), nullable=False)
     transports = relationship('Transport', backref=backref('transports', uselist=True, cascade='delete,all'))
-    accomodations = relationship('Accomodation', backref=backref('accomodations', uselist=True, cascade='delete,all'))
+    accomodations = relationship('Accomodation', backref=backref(
+        'accomodations', uselist=True, cascade='delete,all'), lazy='subquery')
+    city = relationship('City', lazy='joined')
 
     @hybrid_property
     def budget(self):
-        transport_prices = [transport['price'] for transport in self.transports]
-        accomodations_prices = [accomodation['price'] for accomodation in self.accomodations]
+        transport_prices = [transport.price for transport in self.transports]
+        accomodations_prices = [accomodation.price for accomodation in self.accomodations]
         return min(transport_prices) + min(accomodations_prices)
 
     @hybrid_property
     def transport_duration(self):
-        transport_durations = [transport['duration'] for transport in self.transports]
+        transport_durations = [transport.duration for transport in self.transports]
         return min(transport_durations)
 
     def input(self):
         self.start = datetime.datetime.strptime(input("Date de départ? "), "%d/%m/%Y")
         self.end = datetime.datetime.strptime(input("Date de retour? "), "%d/%m/%Y")
         self.review = str(input("Avis sur la ville ? "))
-        self.cityId = int(input("Ville? "))
+        self.city_id = int(input("Ville? "))
 
     def __repr__(self):
         return "Travel (start=%s, end=%s, review=%s)" % (
@@ -83,18 +86,19 @@ class Transport(Base):
     """
     __tablename__ = 'transports'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    type = Column(Enum('Voiture', 'Train', 'Avion', 'Bateau'), nullable=False)
-    price = Column(Numeric(2, 4), nullable=False)
+    type = Column(Enum('Voiture', 'Train', 'Avion', 'Bateau', 'Bus'), nullable=False)
+    price = Column(Integer, nullable=False)
     duration = Column(Integer, nullable=False)
-    travelId = Column(Integer, ForeignKey('travels.id'), nullable=False)
+    travel_id = Column(Integer, ForeignKey('travels.id'), nullable=False)
 
     def input(self):
         self.type = str(input("Type? "))
-        self.price = float(input("Prix? "))
+        self.price = int(input("Prix? "))
         self.duration = int(input("Durée? "))
 
     def __repr__(self):
-        return "Transport (type=%s, price=%d, duration=%d)" % (self.type, self.price, self.duration)
+        return "Transport (type=%s, price=%d, duration=%d)" % (
+            self.type, self.price, self.duration)
 
 
 class Accomodation(Base):
@@ -104,14 +108,14 @@ class Accomodation(Base):
     __tablename__ = 'accomodations'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
-    type = Column(Enum('Hôtel', 'Gîte', 'Location', 'Camping'), nullable=False)
-    price = Column(Numeric(2, 4), nullable=False)
-    travelId = Column(Integer, ForeignKey('travels.id'), nullable=False)
+    type = Column(Enum('Hôtel', 'Gîte', 'Appartement', 'Camping'), nullable=False)
+    price = Column(Integer, nullable=False)
+    travel_id = Column(Integer, ForeignKey('travels.id'), nullable=False)
 
     def input(self):
         self.name = str(input("Nom? "))
         self.type = str(input("Type? "))
-        self.price = float(input("Prix? "))
+        self.price = int(input("Prix? "))
 
     def __repr__(self):
         return "Accomodation (name=%s, type=%s, price=%d)" % (self.name, self.type, self.price)
