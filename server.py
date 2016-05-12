@@ -2,9 +2,8 @@
 # Serveur de l'application
 #
 
-from mako.template import Template
 from mako.lookup import TemplateLookup
-from services import CityService, TravelService
+from facades import CityFacade, TravelFacade
 import cherrypy
 import os
 
@@ -37,7 +36,7 @@ class Controller:
 
     def __init__(self):
         self.message = None
-        self.title = None
+        self.title = ''
 
     def setMessage(self, message):
         self.message = message
@@ -64,13 +63,13 @@ class FrontendController(Controller):
 
     @cherrypy.expose
     def index(self):
-        self.setTitle('Accueil')
+        # self.setTitle('Accueil')
         return self.render(_home)
 
     @cherrypy.expose
     def travel(self, travel_id=None):
         try:
-            travel = TravelService.find(travel_id)
+            travel = TravelFacade.find(travel_id)
         except:
             raise cherrypy.NotFound
 
@@ -79,17 +78,21 @@ class FrontendController(Controller):
 
     @cherrypy.expose
     def travels(self, sorting=None):
+        # Tri par capital
         if sorting == 'capitals':
-            travels = TravelService.all_capitals()
+            travels = TravelFacade.all_capitals()
             self.setTitle('Liste des voyages concernant une capitale')
+        # Tri par budget
         elif sorting == 'budget':
-            travels = TravelService.all_by_budget()
+            travels = TravelFacade.all_by_budget()
             self.setTitle('Liste des voyages triés par budget')
+        # Tri par durée de transport
         elif sorting == 'transport_duration':
-            travels = TravelService.all_by_transport_duration()
+            travels = TravelFacade.all_by_transport_duration()
             self.setTitle('Liste des voyages triés par durée de transport')
+        # Tri par défaut
         else:
-            travels = TravelService.all()
+            travels = TravelFacade.all()
             self.setTitle('Liste des voyages')
 
         if len(travels) == 0:
@@ -120,7 +123,7 @@ class BackendController(Controller):
         if city_id is None:
             travel = None
         else:
-            travel = TravelService.find(city_id)
+            travel = TravelFacade.find(city_id)
 
         # On a cliqué sur le bouton de suppression
         if delete is not None:
@@ -133,7 +136,7 @@ class BackendController(Controller):
                 self.update_city(city_id, name, is_capital, country, capital_id)
 
         self.setTitle('Gérer les villes')
-        travels = TravelService.all()
+        travels = TravelFacade.all()
 
         return self.render(_admin_travels, travels=travels, travel=travel)
 
@@ -167,7 +170,7 @@ class BackendController(Controller):
         :return:
         """
         try:
-            TravelService.delete(city_id)
+            TravelFacade.delete(city_id)
             self.setMessage('Suppression réussie !')
         except:
             self.setMessage('Erreur lors de la suppression !')
