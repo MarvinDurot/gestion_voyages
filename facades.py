@@ -1,5 +1,5 @@
 """
-Services de l'application
+Facades de l'application
 """
 
 from models import Travel, Transport, Accomodation, City, Session
@@ -7,7 +7,7 @@ from models import Travel, Transport, Accomodation, City, Session
 
 class GenericFacade:
     """
-    Service générique permettant de manipuler
+    Facade générique permettant de manipuler
     les modèles en base plus simplement.
     """
     __modelClass__ = None
@@ -56,7 +56,7 @@ class GenericFacade:
 
 class CityFacade(GenericFacade):
     """
-    Service pour le modèle City.
+    Facade pour le modèle City.
     """
     __modelClass__ = City
 
@@ -79,7 +79,7 @@ class CityFacade(GenericFacade):
 
 class TravelFacade(GenericFacade):
     """
-    Service pour le modèle Travel.
+    Facade pour le modèle Travel.
     """
     __modelClass__ = Travel
 
@@ -113,13 +113,13 @@ class TravelFacade(GenericFacade):
 
 class TransportFacade(GenericFacade):
     """
-    Service pour le modèle Transport.
+    Facade pour le modèle Transport.
     """
     __modelClass__ = Transport
 
 
 class AccomodationFacade(GenericFacade):
     """
-    Service pour le modèle Accomodation.
+    Facade pour le modèle Accomodation.
     """
     __modelClass__ = Accomodation
