@@ -212,7 +212,7 @@ def validate_password(real, username, password):
     :param password: string
     :return: boolean
     """
-    if username == 'admin' and password == 'admin123':
+    if username == 'admin' and password == 'admin':
         return True
     else:
         return False
@@ -238,7 +238,7 @@ if __name__ == '__main__':
 
     # Configuration de l'application
     app_conf = {
-        'backend': {
+        '/backend': {
             'tools.auth_basic.on': True,
             'tools.auth_basic.realm': '127.0.0.1',
             'tools.auth_basic.checkpassword': validate_password
