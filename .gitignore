@@ -1,4 +1,5 @@
 __pycache__/
+/templates/mako_modules/*
 *$py.class
 .idea
 *.log
