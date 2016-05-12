@@ -2,7 +2,7 @@
 Gestion de l'application en mode textuel
 """
 
-from services import *
+from facades import *
 import os
 
 
@@ -103,10 +103,10 @@ class Application:
     """
 
     def __init__(self):
-        self.cities = CityService.all()
-        self.travels = TravelService.all()
-        self.transports = TransportService.all()
-        self.accomodations = AccomodationService.all()
+        self.cities = CityFacade.all()
+        self.travels = TravelFacade.all()
+        self.transports = TransportFacade.all()
+        self.accomodations = AccomodationFacade.all()
         self.menu = Menu("Menu principal", self.getActions())
 
     def getActions(self):
@@ -117,19 +117,19 @@ class Application:
 
     def all(self, args):
         actions = []
-        for travel in TravelService.all():
+        for travel in TravelFacade.all():
             actions.append(MenuAction(str(travel), self.show, travel.id))
         menu = Menu("Choisir un voyage", actions)
         menu.loop()
 
     def show(self, id):
-        print(TravelService.find(id))
+        print(TravelFacade.find(id))
         input("\nAppuyez sur une touche pour continuer...")
 
     def delete(self, args):
         actions = []
-        for travel in TravelService.all():
-            actions.append(MenuAction(str(travel), TravelService.delete, travel.id))
+        for travel in TravelFacade.all():
+            actions.append(MenuAction(str(travel), TravelFacade.delete, travel.id))
         menu = Menu("Supprimer un voyage", actions)
         menu.loop()
 
@@ -155,7 +155,7 @@ class Application:
             except ValueError:
                 break
 
-        TravelService.create(travel)
+        TravelFacade.save(travel)
 
     def run(self):
         self.menu.loop()
