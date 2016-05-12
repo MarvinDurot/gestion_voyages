@@ -13,7 +13,7 @@
                         <th data-field="start">Date de départ</th>
                         <th data-field="end">Date de retour</th>
                         <th data-field="nearest_capital">Capitale la plus proche</th>
-                        <th data-field="transport">Durée de transport</th>
+                        <th data-field="transport">Durée de transport (heures)</th>
                         <th data-field="price">Budget (euros)</th>
                     </tr>
                     </thead>
@@ -23,7 +23,7 @@
                         <td>${travel.city.name}</td>
                         <td>${travel.start}</td>
                         <td>${travel.end}</td>
-                        <td>${travel.nearest_capital}</td>
+                        <td>${travel.city.nearest_capital}</td>
                         <td>${travel.transport_duration}</td>
                         <td>${travel.budget}</td>
                     </tr>
