@@ -26,7 +26,7 @@ _travel = mylookup.get_template('travel.mako.html')
 _travels = mylookup.get_template('travels.mako.html')
 _admin = mylookup.get_template('admin.mako.html')
 _admin_travels = mylookup.get_template('admin_travels.mako.html')
-# _admin_cities = mylookup.get_template('admin_cities.mako.html')
+_admin_cities = mylookup.get_template('admin_cities.mako.html')
 
 
 class Controller:
@@ -63,7 +63,7 @@ class FrontendController(Controller):
 
     @cherrypy.expose
     def index(self):
-        # self.setTitle('Accueil')
+        self.setTitle('Accueil')
         return self.render(_home)
 
     @cherrypy.expose
@@ -112,65 +112,92 @@ class BackendController(Controller):
         return self.render(_admin)
 
     @cherrypy.expose
-    def travels(self):
-        # TODO : traiter l'ajout et la suppression de voyages
-        self.setTitle('Administration des voyages')
-        return self.render(_admin_travels)
+    def travels(self, travel_id=None):
+        # Récupération du voyage si son id est précisé
+        if travel_id is None:
+            travel = None
+        else:
+            travel = TravelFacade.find(travel_id)
+
+        # On a cliqué sur le bouton de suppression
+        if delete is not None:
+            self.delete_travel(travel_id)
+        # On a cliqué sur le bouton de sauvegarde
+        elif save is not None:
+            self.create_travel(city_id, start, end, review, accomodations, transports)
+
+        self.setTitle('Gérer les voyages')
+        travels = TravelFacade.all()
+        cities = CityFacade.all()
+        return self.render(_admin_travels, cities=cities, travels=travels, travel=travel)
+
+    def create_travel(self, city_id, start, end, review, accomodations, transports):
+        """
+        Crée un voyage, ses hébergements et ses transports en base à partir d'un formulaire
+
+        :param city_id: integer
+        :param start: datetime
+        :param end: datetime
+        :param review: string
+        :param accomodations: list
+        :param transports: list
+        :return: void
+        """
+        # TODO : valider les champs du formulaire
+        # TODO : enregistrer le voyage, ses transports et ses hébergements en base
+        self.setMessage('Le voyage a bien été mis à jour !')
+
+    def delete_travel(self, travel_id):
+        try:
+            TravelFacade.delete(travel_id)
+            self.setMessage('Suppression réussie !')
+        except:
+            self.setMessage('Erreur lors de la suppression !')
 
     @cherrypy.expose
     def cities(self, city_id=None, name=None, is_capital=None, country=None, capital_id=None, delete=None, save=None):
         # Récupération de la ville si son id est précisé
         if city_id is None:
-            travel = None
+            city = None
         else:
-            travel = TravelFacade.find(city_id)
+            city = CityFacade.find(city_id)
 
         # On a cliqué sur le bouton de suppression
         if delete is not None:
             self.delete_city(city_id)
         # On a cliqué sur le bouton de sauvegarde
         elif save is not None:
-            if city_id == 0:
-                self.create_city(name, is_capital, country, capital_id)
-            else:
-                self.update_city(city_id, name, is_capital, country, capital_id)
+            self.create_city(name, is_capital, country, capital_id)
 
         self.setTitle('Gérer les villes')
-        travels = TravelFacade.all()
+        cities = CityFacade.all()
 
-        return self.render(_admin_travels, travels=travels, travel=travel)
-
-    def update_city(self, id, name, is_capital, country, capital_id):
-        """
-        Met à jour une ville à partir d'informations récupérées dans un formulaire
-        :param id:
-        :param name:
-        :param is_capital:
-        :param country:
-        :param capital_id:
-        :return:
-        """
-        pass
+        return self.render(_admin_cities, cities=cities, city=city)
 
     def create_city(self, name, is_capital, country, capital_id):
         """
-        Crée une nouvelle ville à partir d'informations récupérées dans un formulaire
-        :param name:
-        :param is_capital:
-        :param country:
-        :param capital_id:
-        :return:
+        Crée une nouvelle ville à partir des informations du formulaire
+
+        :param name: string
+        :param is_capital: boolean
+        :param country: string
+        :param capital_id: integer
+        :return: void
         """
+        # TODO : valider les champs du formulaire
+        # TODO : enregistrer la ville en base
+        self.setMessage('La ville a bien été mise à jour !')
         pass
 
     def delete_city(self, city_id):
         """
-        Supprime une ville
-        :param city_id:
-        :return:
+        Supprime une ville en base
+
+        :param city_id: integer
+        :return: void
         """
         try:
-            TravelFacade.delete(city_id)
+            CityFacade.delete(city_id)
             self.setMessage('Suppression réussie !')
         except:
             self.setMessage('Erreur lors de la suppression !')
@@ -179,9 +206,10 @@ class BackendController(Controller):
 def validate_password(real, username, password):
     """
     Fonction de vérification du login / mot de passe
+
     :param real:
-    :param username:
-    :param password:
+    :param username: string
+    :param password: string
     :return: boolean
     """
     if username == 'admin' and password == 'admin123':
