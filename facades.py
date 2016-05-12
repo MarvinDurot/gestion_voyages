@@ -5,7 +5,7 @@ Services de l'application
 from models import Travel, Transport, Accomodation, City, Session
 
 
-class GenericService:
+class GenericFacade:
     """
     Service générique permettant de manipuler
     les modèles en base plus simplement.
@@ -43,10 +43,10 @@ class GenericService:
         cls.__session__.flush()
 
     @classmethod
-    def create(cls, obj):
+    def save(cls, obj):
         """
-        Crée un nouvel enregistrement en base
-        :param obj: l'objet correspondant à l'enregistrement à supprimer
+        Crée ou met à jour un enregistrement en base
+        :param obj: l'objet à sauvegarder
         :return: void
         """
         cls.__session__.add(obj)
@@ -54,55 +54,71 @@ class GenericService:
         cls.__session__.flush()
 
 
-class CityService(GenericService):
+class CityFacade(GenericFacade):
     """
     Service pour le modèle City.
     """
     __modelClass__ = City
 
+    @classmethod
+    def all_capitals(cls):
+        """
+        Récupère toutes les villes qui sont des capitales
+        :return: list
+        """
+        return cls.__session__.query(City).filter(City.is_capital == 1).all()
 
-class TravelService(GenericService):
+    @classmethod
+    def all_non_capitals(cls):
+        """
+        Récupère toutes les villes qui ne sont pas des capitales
+        :return: list
+        """
+        return cls.__session__.query(City).filter(City.is_capital == 0).all()
+
+
+class TravelFacade(GenericFacade):
     """
     Service pour le modèle Travel.
     """
     __modelClass__ = Travel
 
     @classmethod
-    def all_capitals(self):
+    def all_capitals(cls):
         """
         Récupère tous les voyages qui concernent une capitale
         :return: list
         """
-        return self.__session__.query(Travel, City) \
-            .join(City).filter(City.isCapital == 1) \
+        return cls.__session__.query(Travel, City) \
+            .join(City).filter(City.is_capital == 1) \
             .order_by(City.name).all()
 
     @classmethod
-    def all_by_budget(self):
+    def all_by_budget(cls):
         """
         Récupère tous les voyages triés par budget minimum
         (prix de l'hébergement + prix du transport)
         :return: list
         """
-        return self.__session__.query(Travel).order_by(Travel.budget).all()
+        return sorted(cls.all(), key=lambda travel: travel.budget, reverse=True)
 
     @classmethod
-    def all_by_transport_duration(self):
+    def all_by_transport_duration(cls):
         """
         Récupère tous les voyages triés par durée de transport minimum
         :return: list
         """
-        return self.__session__.query(Travel).order_by(Travel.transport_duration).all()
+        return sorted(cls.all(), key=lambda travel: travel.transport_duration, reverse=True)
 
 
-class TransportService(GenericService):
+class TransportFacade(GenericFacade):
     """
     Service pour le modèle Transport.
     """
     __modelClass__ = Transport
 
 
-class AccomodationService(GenericService):
+class AccomodationFacade(GenericFacade):
     """
     Service pour le modèle Accomodation.
     """
