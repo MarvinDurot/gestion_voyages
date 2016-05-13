@@ -24,7 +24,7 @@ class City(Base):
     is_capital = Column(Boolean, nullable=False, default=False)
     country = Column(String, nullable=False)
     capital_id = Column(Integer, ForeignKey('cities.id'), nullable=True)
-    capital = relationship('City', lazy='joined')
+    capital = relationship('City', remote_side=[id], lazy='joined')
 
     @hybrid_property
     def nearest_capital(self):
@@ -34,7 +34,7 @@ class City(Base):
             return self.capital.name
 
     def __repr__(self):
-        return "City (name=%s, nearest_capital=%s, country=%s)" % (self.name, self.is_capital, self.country)
+        return "City (name=%s, nearest_capital=%s, country=%s)" % (self.name, self.nearest_capital, self.country)
 
     def input(self):
         self.name = str(input("Nom?"))
@@ -76,8 +76,8 @@ class Travel(Base):
         self.city_id = int(input("Ville? "))
 
     def __repr__(self):
-        return "Travel (start=%s, end=%s, review=%s)" % (
-            self.start.strftime("%d-%m-%Y"), self.end.strftime("%d-%m-%Y"), self.review)
+        return "Travel (city=%s, start=%s, end=%s)" % (
+            self.city.name, self.start.strftime("%d-%m-%Y"), self.end.strftime("%d-%m-%Y"))
 
 
 class Transport(Base):
