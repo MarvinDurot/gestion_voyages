@@ -2,7 +2,8 @@
 Gestion de l'application en mode textuel
 """
 
-from facades import *
+from services import *
+from models import Session
 import os
 
 
@@ -102,11 +103,9 @@ class Application:
     Application de gestion de voyages en mode textuel
     """
 
-    def __init__(self):
-        self.cities = CityFacade.all()
-        self.travels = TravelFacade.all()
-        self.transports = TransportFacade.all()
-        self.accomodations = AccomodationFacade.all()
+    def __init__(self, session):
+        self.city_service = CityService(session)
+        self.travel_service = TravelService(session)
         self.menu = Menu("Menu principal", self.getActions())
 
     def getActions(self):
@@ -117,19 +116,20 @@ class Application:
 
     def all(self, args):
         actions = []
-        for travel in TravelFacade.all():
+        for travel in self.travel_service.all():
             actions.append(MenuAction(str(travel), self.show, travel.id))
         menu = Menu("Choisir un voyage", actions)
         menu.loop()
 
     def show(self, id):
-        print(TravelFacade.find(id))
+        travel = self.travel_service.find(id)
+        print("%s \n\nreview=%s)" % (travel, travel.review))
         input("\nAppuyez sur une touche pour continuer...")
 
     def delete(self, args):
         actions = []
-        for travel in TravelFacade.all():
-            actions.append(MenuAction(str(travel), TravelFacade.delete, travel.id))
+        for travel in self.travel_service.all():
+            actions.append(MenuAction(str(travel), self.travel_service.delete, travel.id))
         menu = Menu("Supprimer un voyage", actions)
         menu.loop()
 
@@ -155,12 +155,17 @@ class Application:
             except ValueError:
                 break
 
-        TravelFacade.save(travel)
+        self.travel_service.save(travel)
 
     def run(self):
         self.menu.loop()
 
 
 if __name__ == '__main__':
-    app = Application()
+    # Création d'une session pour la base
+    session = Session()
+    # Création et lancement de l'application
+    app = Application(session)
     app.run()
+    # Fermeture de la session
+    session.close()
