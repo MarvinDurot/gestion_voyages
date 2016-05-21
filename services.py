@@ -54,7 +54,7 @@ class GenericService:
         :return: void
         """
         self.newSession()
-        obj = self.find(id)
+        obj = self.session.query(self.__modelClass__).get(id)
         self.session.delete(obj)
         self.session.commit()
         self.session.flush()
