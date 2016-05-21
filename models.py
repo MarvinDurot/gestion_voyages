@@ -54,8 +54,7 @@ class Travel(Base):
     review = Column(String, nullable=True)
     city_id = Column(Integer, ForeignKey('cities.id'), nullable=False)
     transports = relationship('Transport', backref=backref('transports', uselist=True, cascade='delete,all'))
-    accomodations = relationship('Accomodation', backref=backref(
-        'accomodations', uselist=True, cascade='delete,all'), lazy='subquery')
+    accomodations = relationship('Accomodation', backref=backref('accomodations', uselist=True, cascade='delete,all'))
     city = relationship('City', lazy='joined')
 
     @hybrid_property
@@ -90,6 +89,7 @@ class Transport(Base):
     price = Column(Integer, nullable=False)
     duration = Column(Integer, nullable=False)
     travel_id = Column(Integer, ForeignKey('travels.id'), nullable=False)
+    travel = relationship('Travel', backref=backref('transports', cascade="all,delete"))
 
     def input(self):
         self.type = str(input("Type? "))
@@ -111,6 +111,7 @@ class Accomodation(Base):
     type = Column(Enum('Hôtel', 'Gîte', 'Appartement', 'Camping'), nullable=False)
     price = Column(Integer, nullable=False)
     travel_id = Column(Integer, ForeignKey('travels.id'), nullable=False)
+    travel = relationship('Travel', backref=backref('accomodations', cascade="all,delete"))
 
     def input(self):
         self.name = str(input("Nom? "))
