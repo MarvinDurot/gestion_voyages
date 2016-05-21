@@ -3,7 +3,8 @@
 #
 
 from mako.lookup import TemplateLookup
-from facades import CityFacade, TravelFacade
+from services import CityService, TravelService
+from models import Travel, City, Transport, Accomodation, Session
 import cherrypy
 import os
 
@@ -21,12 +22,12 @@ mylookup = TemplateLookup(
 )
 
 # Templates de l'application
-_home = mylookup.get_template('home.mako.html')
-_travel = mylookup.get_template('travel.mako.html')
-_travels = mylookup.get_template('travels.mako.html')
-_admin = mylookup.get_template('admin.mako.html')
-_admin_travels = mylookup.get_template('admin_travels.mako.html')
-_admin_cities = mylookup.get_template('admin_cities.mako.html')
+_home = mylookup.get_template('page_home.mako.html')
+_travel = mylookup.get_template('page_travel.mako.html')
+_travels = mylookup.get_template('page_travels.mako.html')
+_backend = mylookup.get_template('page_backend.mako.html')
+_backend_travels = mylookup.get_template('page_backend_travels.mako.html')
+_backend_cities = mylookup.get_template('page_backend_cities.mako.html')
 
 
 class Controller:
@@ -34,9 +35,19 @@ class Controller:
     Contrôleur par défaut (héritage)
     """
 
+    # Messages
+    _creation_success = 'Création réussie !'
+    _creation_error = 'Erreur lors de la création !'
+    _deletion_success = 'Suppression réussie !',
+    _deletion_error = 'Erreur lors de la suppression !'
+    _loading_success = 'Chargement réussi !'
+    _loading_error = 'Erreur lors du chargement !'
+
     def __init__(self):
         self.message = None
         self.title = ''
+        self.travel_service = TravelService()
+        self.city_service = CityService()
 
     def setMessage(self, message):
         self.message = message
@@ -69,7 +80,7 @@ class FrontendController(Controller):
     @cherrypy.expose
     def travel(self, travel_id=None):
         try:
-            travel = TravelFacade.find(travel_id)
+            travel = self.travel_service.find(travel_id)
         except:
             raise cherrypy.NotFound
 
@@ -80,19 +91,19 @@ class FrontendController(Controller):
     def travels(self, sorting=None):
         # Tri par capital
         if sorting == 'capitals':
-            travels = TravelFacade.all_capitals()
+            travels = self.travel_service.all_capitals()
             self.setTitle('Liste des voyages concernant une capitale')
         # Tri par budget
         elif sorting == 'budget':
-            travels = TravelFacade.all_by_budget()
+            travels = self.travel_service.all_by_budget()
             self.setTitle('Liste des voyages triés par budget')
         # Tri par durée de transport
         elif sorting == 'transport_duration':
-            travels = TravelFacade.all_by_transport_duration()
+            travels = self.travel_service.all_by_transport_duration()
             self.setTitle('Liste des voyages triés par durée de transport')
         # Tri par défaut
         else:
-            travels = TravelFacade.all()
+            travels = self.travel_service.all()
             self.setTitle('Liste des voyages')
 
         if len(travels) == 0:
@@ -109,50 +120,41 @@ class BackendController(Controller):
     @cherrypy.expose
     def index(self):
         self.setTitle('Menu administration')
-        return self.render(_admin)
+        return self.render(_backend)
 
     @cherrypy.expose
-    def travels(self, travel_id=None):
+    def travels(self, travel_id=None, city_id=None, start=None, end=None, review=None, accomodation_name=None,
+                accomodation_type=None, accomodation_price=None, transport_type=None, transport_price=None,
+                transport_duration=None, save=None, delete=None):
+
         # Récupération du voyage si son id est précisé
         if travel_id is None:
             travel = None
         else:
-            travel = TravelFacade.find(travel_id)
+            travel = self.travel_service.find(travel_id)
 
         # On a cliqué sur le bouton de suppression
         if delete is not None:
-            self.delete_travel(travel_id)
+            self.setMessage(self._deletion_success)
+            try:
+                self.travel_service.delete(travel.id)
+            except:
+                self.setMessage(self._deletion_error)
         # On a cliqué sur le bouton de sauvegarde
         elif save is not None:
-            self.create_travel(city_id, start, end, review, accomodations, transports)
+            self.setMessage(self._creation_success)
+            try:
+                self.travel_service.create(city_id, start, end, review, accomodation_name, accomodation_type,
+                                           accomodation_price, transport_type, transport_price, transport_duration)
+            except:
+                self.setMessage(self._creation_error)
 
+        # Récupération des données
         self.setTitle('Gérer les voyages')
-        travels = TravelFacade.all()
-        cities = CityFacade.all()
-        return self.render(_admin_travels, cities=cities, travels=travels, travel=travel)
+        travels = self.travel_service.all()
+        cities = self.city_service.all()
 
-    def create_travel(self, city_id, start, end, review, accomodations, transports):
-        """
-        Crée un voyage, ses hébergements et ses transports en base à partir d'un formulaire
-
-        :param city_id: integer
-        :param start: datetime
-        :param end: datetime
-        :param review: string
-        :param accomodations: list
-        :param transports: list
-        :return: void
-        """
-        # TODO : valider les champs du formulaire
-        # TODO : enregistrer le voyage, ses transports et ses hébergements en base
-        self.setMessage('Le voyage a bien été mis à jour !')
-
-    def delete_travel(self, travel_id):
-        try:
-            TravelFacade.delete(travel_id)
-            self.setMessage('Suppression réussie !')
-        except:
-            self.setMessage('Erreur lors de la suppression !')
+        return self.render(_backend_travels, cities=cities, travels=travels, travel=travel)
 
     @cherrypy.expose
     def cities(self, city_id=None, name=None, is_capital=None, country=None, capital_id=None, delete=None, save=None):
@@ -160,47 +162,29 @@ class BackendController(Controller):
         if city_id is None:
             city = None
         else:
-            city = CityFacade.find(city_id)
+            city = self.travel_service.find(city_id)
 
         # On a cliqué sur le bouton de suppression
         if delete is not None:
-            self.delete_city(city_id)
+            self.setMessage(self._deletion_success)
+            try:
+                self.travel_service.delete(city.id)
+            except:
+                self.setMessage(self._deletion_error)
         # On a cliqué sur le bouton de sauvegarde
         elif save is not None:
-            self.create_city(name, is_capital, country, capital_id)
+            self.setMessage(self._creation_success)
+            try:
+                self.city_service.create(name, is_capital, country, capital_id)
+            except:
+                self.setMessage(self._creation_error)
 
+        # Récupération des données
         self.setTitle('Gérer les villes')
-        cities = CityFacade.all()
+        capitals = self.city_service.all_capitals()
+        cities = self.city_service.all()
 
-        return self.render(_admin_cities, cities=cities, city=city)
-
-    def create_city(self, name, is_capital, country, capital_id):
-        """
-        Crée une nouvelle ville à partir des informations du formulaire
-
-        :param name: string
-        :param is_capital: boolean
-        :param country: string
-        :param capital_id: integer
-        :return: void
-        """
-        # TODO : valider les champs du formulaire
-        # TODO : enregistrer la ville en base
-        self.setMessage('La ville a bien été mise à jour !')
-        pass
-
-    def delete_city(self, city_id):
-        """
-        Supprime une ville en base
-
-        :param city_id: integer
-        :return: void
-        """
-        try:
-            CityFacade.delete(city_id)
-            self.setMessage('Suppression réussie !')
-        except:
-            self.setMessage('Erreur lors de la suppression !')
+        return self.render(_backend_cities, cities=cities, capitals=capitals, city=city)
 
 
 def validate_password(real, username, password):
