@@ -52,10 +52,11 @@ class Travel(Base):
     start = Column(DateTime, nullable=False)
     end = Column(DateTime, nullable=False)
     review = Column(String, nullable=True)
-    city_id = Column(Integer, ForeignKey('cities.id'), nullable=False)
-    transports = relationship('Transport', backref=backref('transports', uselist=True, cascade='delete,all'))
-    accomodations = relationship('Accomodation', backref=backref('accomodations', uselist=True, cascade='delete,all'))
+    city_id = Column(Integer, ForeignKey('cities.id', ondelete='cascade'), nullable=False)
     city = relationship('City', lazy='joined')
+    transports = relationship('Transport', cascade='all,delete-orphan', backref=backref('transports', uselist=True))
+    accomodations = relationship('Accomodation', cascade='all,delete-orphan',
+                                 backref=backref('accomodations', uselist=True))
 
     @hybrid_property
     def budget(self):
@@ -88,8 +89,7 @@ class Transport(Base):
     type = Column(Enum('Voiture', 'Train', 'Avion', 'Bateau', 'Bus'), nullable=False)
     price = Column(Integer, nullable=False)
     duration = Column(Integer, nullable=False)
-    travel_id = Column(Integer, ForeignKey('travels.id'), nullable=False)
-    travel = relationship('Travel', backref=backref('transports', cascade="all,delete"))
+    travel_id = Column(Integer, ForeignKey('travels.id', ondelete='cascade'), nullable=False)
 
     def input(self):
         self.type = str(input("Type? "))
@@ -110,8 +110,7 @@ class Accomodation(Base):
     name = Column(String, nullable=False)
     type = Column(Enum('Hôtel', 'Gîte', 'Appartement', 'Camping'), nullable=False)
     price = Column(Integer, nullable=False)
-    travel_id = Column(Integer, ForeignKey('travels.id'), nullable=False)
-    travel = relationship('Travel', backref=backref('accomodations', cascade="all,delete"))
+    travel_id = Column(Integer, ForeignKey('travels.id', ondelete='cascade'), nullable=False)
 
     def input(self):
         self.name = str(input("Nom? "))
