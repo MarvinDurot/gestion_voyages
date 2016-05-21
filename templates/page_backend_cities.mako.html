@@ -14,10 +14,10 @@
                     </tr>
                     </thead>
                     <tbody>
-                    % for city in cities:
-                    <tr onClick="window.location.href = '/backend/cities?city_id=${city.id}';">
-                        <td>${city.name}</td>
-                        <td>${city.country}</td>
+                    % for c in cities:
+                    <tr onClick="window.location.href = '/backend/cities?city_id=${c.id}';">
+                        <td>${c.name}</td>
+                        <td>${c.country}</td>
                     </tr>
                     % endfor
                     </tbody>
@@ -72,7 +72,7 @@
             % else:
 
             <!--Formulaire de suppression -->
-            <form class="col s12 m6" method="POST" action="">
+            <form class="col s12 m6" method="POST" action="/backend/cities">
                 <div class="row">
                     <div class="input-field col s6">
                         <input type="text" value="${city.name}" disabled>
@@ -83,12 +83,9 @@
                         <label>Pays</label>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="input-field col s12">
-                        <input value="${city.nearest_capital}" disabled>
-                        <label>Capitale la plus proche</label>
-                    </div>
-                </div>
+
+                <!-- Champ caché -->
+                <input id="city_id" name="city_id" value="${city.id}" type="hidden">
 
                 <br/>
 

@@ -16,11 +16,11 @@
                     </tr>
                     </thead>
                     <tbody>
-                    % for travel in travels:
-                    <tr onClick="window.location.href = '/backend/travels?travel_id=${travel.id}';">
-                        <td>${travel.city.name}</td>
-                        <td>${travel.start}</td>
-                        <td>${travel.end}</td>
+                    % for t in travels:
+                    <tr onClick="window.location.href = '/backend/travels?travel_id=${t.id}';">
+                        <td>${t.city.name}</td>
+                        <td>${t.start}</td>
+                        <td>${t.end}</td>
                     </tr>
                     % endfor
                     </tbody>
@@ -87,7 +87,7 @@
                                     <label for="transport_price">Prix</label>
                                 </div>
                             </div>
-                            <br/><br/><br/>
+                            <div class="row row-offset"></div>
                         </div>
                         <div class="modal-footer"></div>
                     </div>
@@ -117,8 +117,8 @@
                                     <input id="accomodation_price" name="accomodation_price" type="number" class="validate">
                                     <label for="accomodation_price">Prix</label>
                                 </div>
-                                <br/><br/><br/>
                             </div>
+                            <div class="row row-offset"></div>
                         </div>
                         <div class="modal-footer"></div>
                     </div>
@@ -156,7 +156,7 @@
             % else:
 
             <!--Formulaire de suppression -->
-            <form class="col s12 m6" method="POST" action="">
+            <form class="col s12 m6" method="POST" action="/backend/travels">
                 <div class="row">
                     <div class="input-field col s12">
                         <input type="text" value="${travel.city.name}" disabled>
@@ -165,14 +165,17 @@
                 </div>
                 <div class="row">
                     <div class="input-field col s6">
-                        <input type="date" class="datepicker" disabled>
+                        <input type="date" class="datepicker" value="${travel.start}" disabled>
                         <label>Date de départ</label>
                     </div>
                     <div class="input-field col s6">
-                        <input type="date" class="datepicker" disabled>
+                        <input type="date" class="datepicker" value="${travel.end}" disabled>
                         <label>Date de retour</label>
                     </div>
                 </div>
+
+                <!-- Champ caché -->
+                <input id="travel_id" name="travel_id" value="${travel.id}" type="hidden">
 
                 <br/>
 
