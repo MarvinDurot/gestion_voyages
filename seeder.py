@@ -24,8 +24,8 @@ class Seeder:
         :return: void
         """
         self.session = Session()
-        self.travel_service = TravelService(self.session)
-        self.city_service = CityService(self.session)
+        self.travel_service = TravelService()
+        self.city_service = CityService()
         self.fake = Factory.create()
         self.number_of_cities = number_of_cities
         self.number_of_travels = number_of_travels

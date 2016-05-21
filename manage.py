@@ -103,9 +103,9 @@ class Application:
     Application de gestion de voyages en mode textuel
     """
 
-    def __init__(self, session):
-        self.city_service = CityService(session)
-        self.travel_service = TravelService(session)
+    def __init__(self):
+        self.city_service = CityService()
+        self.travel_service = TravelService()
         self.menu = Menu("Menu principal", self.getActions())
 
     def getActions(self):
@@ -162,10 +162,6 @@ class Application:
 
 
 if __name__ == '__main__':
-    # Création d'une session pour la base
-    session = Session()
     # Création et lancement de l'application
-    app = Application(session)
+    app = Application()
     app.run()
-    # Fermeture de la session
-    session.close()
