@@ -38,25 +38,27 @@ class Controller:
     # Messages
     _creation_success = 'Création réussie !'
     _creation_error = 'Erreur lors de la création !'
-    _deletion_success = 'Suppression réussie !',
+    _deletion_success = 'Suppression réussie !'
     _deletion_error = 'Erreur lors de la suppression !'
     _loading_success = 'Chargement réussi !'
     _loading_error = 'Erreur lors du chargement !'
 
     def __init__(self):
-        self.message = None
-        self.title = ''
+        self.message = [None]
+        self.title = None
         self.travel_service = TravelService()
         self.city_service = CityService()
 
     def setMessage(self, message):
-        self.message = message
+        self.message.append(message)
 
     def setTitle(self, title):
         self.title = title
 
     def render(self, view, **kwargs):
-        return view.render_unicode(title=self.title, message=self.message, **kwargs)
+        message = self.message.pop()
+        self.setMessage(None)
+        return view.render_unicode(title=self.title, message=message, **kwargs)
 
     @cherrypy.expose
     def default(self):
@@ -128,6 +130,7 @@ class BackendController(Controller):
                 transport_duration=None, save=None, delete=None):
 
         # Récupération du voyage si son id est précisé
+
         if travel_id is None:
             travel = None
         else:
@@ -135,15 +138,16 @@ class BackendController(Controller):
 
         # On a cliqué sur le bouton de suppression
         if delete is not None:
-            self.setMessage(self._deletion_success)
             try:
+                self.setMessage(self._deletion_success)
                 self.travel_service.delete(travel.id)
+                travel = None
             except:
                 self.setMessage(self._deletion_error)
         # On a cliqué sur le bouton de sauvegarde
         elif save is not None:
-            self.setMessage(self._creation_success)
             try:
+                self.setMessage(self._creation_success)
                 self.travel_service.create(city_id, start, end, review, accomodation_name, accomodation_type,
                                            accomodation_price, transport_type, transport_price, transport_duration)
             except:
@@ -162,20 +166,21 @@ class BackendController(Controller):
         if city_id is None:
             city = None
         else:
-            city = self.travel_service.find(city_id)
+            city = self.city_service.find(city_id)
 
         # On a cliqué sur le bouton de suppression
         if delete is not None:
-            self.setMessage(self._deletion_success)
             try:
-                self.travel_service.delete(city.id)
+                self.setMessage(self._deletion_success)
+                self.city_service.delete(city.id)
+                city = None
             except:
                 self.setMessage(self._deletion_error)
         # On a cliqué sur le bouton de sauvegarde
         elif save is not None:
-            self.setMessage(self._creation_success)
             try:
-                self.city_service.create(name, is_capital, country, capital_id)
+                self.setMessage(self._creation_success)
+                self.city_service.create(name, is_capital is not None, country, capital_id)
             except:
                 self.setMessage(self._creation_error)
 
